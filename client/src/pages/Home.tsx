@@ -16,7 +16,7 @@ import {
   Loader2,
   X,
 } from "lucide-react";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { toast } from "sonner";
 
 type Step = "upload" | "prompt" | "confirm" | "generate" | "result";
@@ -51,14 +51,24 @@ export default function Home() {
     { id: "result", label: "Result", icon: ImageIcon },
   ];
 
-  const getStepStatus = (stepId: string) => {
-    const stepOrder = ["upload", "prompt", "confirm", "generate", "result"];
-    const currentIndex = stepOrder.indexOf(currentStep);
-    const stepIndex = stepOrder.indexOf(stepId);
+  // Memoize step order and index map for O(1) lookups
+  const stepIndexMap = useMemo(() => {
+    const map = new Map<Step, number>();
+    map.set("upload", 0);
+    map.set("prompt", 1);
+    map.set("confirm", 2);
+    map.set("generate", 3);
+    map.set("result", 4);
+    return map;
+  }, []);
+
+  const getStepStatus = useCallback((stepId: string) => {
+    const currentIndex = stepIndexMap.get(currentStep) ?? 0;
+    const stepIndex = stepIndexMap.get(stepId as Step) ?? 0;
     if (stepIndex < currentIndex) return "completed";
     if (stepIndex === currentIndex) return "active";
     return "pending";
-  };
+  }, [currentStep, stepIndexMap]);
 
   const handleFileSelect = useCallback(async (file: File) => {
     if (!file.type.startsWith("image/")) {

@@ -18,22 +18,22 @@ function getStorageConfig(): StorageConfig {
   return { baseUrl: baseUrl.replace(/\/+$/, ""), apiKey };
 }
 
-function buildUploadUrl(baseUrl: string, relKey: string): URL {
+function buildUploadUrl(baseUrl: string, normalizedKey: string): URL {
   const url = new URL("v1/storage/upload", ensureTrailingSlash(baseUrl));
-  url.searchParams.set("path", normalizeKey(relKey));
+  url.searchParams.set("path", normalizedKey);
   return url;
 }
 
 async function buildDownloadUrl(
   baseUrl: string,
-  relKey: string,
+  normalizedKey: string,
   apiKey: string
 ): Promise<string> {
   const downloadApiUrl = new URL(
     "v1/storage/downloadUrl",
     ensureTrailingSlash(baseUrl)
   );
-  downloadApiUrl.searchParams.set("path", normalizeKey(relKey));
+  downloadApiUrl.searchParams.set("path", normalizedKey);
   const response = await fetch(downloadApiUrl, {
     method: "GET",
     headers: buildAuthHeaders(apiKey),

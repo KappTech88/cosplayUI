@@ -38,6 +38,16 @@ export const appRouter = router({
 
         const mimeType = matches[1];
         const base64Data = matches[2];
+        
+        // Validate image size before conversion to prevent memory spikes
+        // Base64 adds ~33% overhead, so calculate approximate buffer size
+        const estimatedBufferSize = (base64Data.length * 3) / 4;
+        const maxSizeBytes = 10 * 1024 * 1024; // 10MB
+        
+        if (estimatedBufferSize > maxSizeBytes) {
+          throw new Error(`Image size exceeds maximum allowed size of ${maxSizeBytes / 1024 / 1024}MB`);
+        }
+        
         const buffer = Buffer.from(base64Data, "base64");
 
         // Generate unique file key
