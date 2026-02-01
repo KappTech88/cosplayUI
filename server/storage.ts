@@ -18,12 +18,23 @@ function getStorageConfig(): StorageConfig {
   return { baseUrl: baseUrl.replace(/\/+$/, ""), apiKey };
 }
 
+/**
+ * Build upload URL with a normalized key (without leading slashes).
+ * @param baseUrl - Storage base URL
+ * @param normalizedKey - Key that has already been normalized (no leading slashes)
+ */
 function buildUploadUrl(baseUrl: string, normalizedKey: string): URL {
   const url = new URL("v1/storage/upload", ensureTrailingSlash(baseUrl));
   url.searchParams.set("path", normalizedKey);
   return url;
 }
 
+/**
+ * Build download URL with a normalized key (without leading slashes).
+ * @param baseUrl - Storage base URL
+ * @param normalizedKey - Key that has already been normalized (no leading slashes)
+ * @param apiKey - API key for authorization
+ */
 async function buildDownloadUrl(
   baseUrl: string,
   normalizedKey: string,

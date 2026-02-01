@@ -119,7 +119,11 @@ function loadMapScript() {
     script.onerror = () => {
       const error = new Error("Failed to load Google Maps script");
       console.error(error);
-      scriptLoadPromise = null; // Reset on error to allow retry
+      // Reset promise after a delay to allow current waiters to receive the error
+      // This prevents race conditions with multiple simultaneous load attempts
+      setTimeout(() => {
+        scriptLoadPromise = null;
+      }, 100);
       reject(error);
     };
     document.head.appendChild(script);
