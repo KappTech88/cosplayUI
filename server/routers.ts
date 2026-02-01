@@ -6,6 +6,9 @@ import { generateImage } from "./_core/imageGeneration";
 import { storagePut } from "./storage";
 import { nanoid } from "nanoid";
 
+// Configuration constants
+const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
+
 // Schema for character info
 const characterInfoSchema = z.object({
   name: z.string(),
@@ -38,6 +41,15 @@ export const appRouter = router({
 
         const mimeType = matches[1];
         const base64Data = matches[2];
+        
+        // Validate image size before conversion to prevent memory spikes
+        // Base64 adds ~33% overhead, so calculate approximate buffer size
+        const estimatedBufferSize = (base64Data.length * 3) / 4;
+        
+        if (estimatedBufferSize > MAX_IMAGE_SIZE_BYTES) {
+          throw new Error(`Image size exceeds maximum allowed size of ${MAX_IMAGE_SIZE_BYTES / 1024 / 1024}MB`);
+        }
+        
         const buffer = Buffer.from(base64Data, "base64");
 
         // Generate unique file key
